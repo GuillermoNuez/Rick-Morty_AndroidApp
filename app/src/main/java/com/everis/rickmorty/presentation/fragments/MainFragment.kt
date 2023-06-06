@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.everis.rickmorty.R
 import com.everis.rickmorty.data.repository.CharacterRepositoryImpl
@@ -15,13 +16,13 @@ import com.everis.rickmorty.domain.usecase.CharacterUseCaseImpl
 import com.everis.rickmorty.presentation.adapters.CharacterAdapter
 import com.everis.rickmorty.presentation.modules.DetailsActivity
 import com.everis.rickmorty.presentation.modules.MainViewModel
+import com.everis.rickmorty.ui.main.Results
 
 class MainFragment : Fragment() {
 
     companion object {
         fun newInstance() = MainFragment()
     }
-
 
     private lateinit var binding: MainFragmentBinding
 
@@ -45,20 +46,39 @@ class MainFragment : Fragment() {
         viewModel.getCharacters()
 
         viewModel.userProfileResponse.observe(viewLifecycleOwner, { userProfileResponse ->
-            val adapter = CharacterAdapter(userProfileResponse.results) { character ->
-                val intent = Intent(requireContext(), DetailsActivity::class.java)
-                intent.putExtra("character", character)
-                startActivity(intent)
-            }
-
-            binding.recyclerView.layoutManager = LinearLayoutManager(context)
-            binding.recyclerView.adapter = adapter
+            setAdapter(userProfileResponse.results)
         })
 
         viewModel.error.observe(viewLifecycleOwner, { error ->
             if (error) {
                 binding.errorLayout.visibility = View.VISIBLE
+                binding.searchView.visibility = View.INVISIBLE
+            } else {
+                binding.errorLayout.visibility = View.INVISIBLE
+                binding.searchView.visibility = View.VISIBLE
             }
         })
+
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                setAdapter(viewModel.filterCharacters(newText))
+                return true
+            }
+        })
+    }
+
+    private fun setAdapter(list : ArrayList<Results> ) {
+        val adapter = CharacterAdapter(list) { character ->
+            val intent = Intent(requireContext(), DetailsActivity::class.java)
+            intent.putExtra("character", character)
+            startActivity(intent)
+        }
+
+        binding.recyclerView.layoutManager = LinearLayoutManager(context)
+        binding.recyclerView.adapter = adapter
     }
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.everis.rickmorty.domain.usecase.CharacterUseCase
 import com.everis.rickmorty.ui.main.ModelResponse
+import com.everis.rickmorty.ui.main.Results
 
 class MainViewModel(private val usecase: CharacterUseCase) : ViewModel() {
 
@@ -22,5 +23,18 @@ class MainViewModel(private val usecase: CharacterUseCase) : ViewModel() {
         } ?: run {
             _error .value = true
         }
+    }
+    fun filterCharacters(s: String): ArrayList<Results> {
+        val filteredList = ArrayList<Results>()
+
+        userProfileResponse.value?.results?.let { results ->
+            for (item in results) {
+                if (item.name?.contains(s, ignoreCase = true) == true) {
+                    filteredList.add(item)
+                }
+            }
+        }
+
+        return filteredList
     }
 }

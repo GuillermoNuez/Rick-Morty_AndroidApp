@@ -40,6 +40,8 @@ class CharacterDataSourceImpl : CharacterDataSource {
 
                 val result = jsonStringHolder.toString()
                 if (result.isNotEmpty()) {
+
+                    println("Data :: $result")
                     Gson().fromJson(result, ModelResponse::class.java)
                 } else {
                     null

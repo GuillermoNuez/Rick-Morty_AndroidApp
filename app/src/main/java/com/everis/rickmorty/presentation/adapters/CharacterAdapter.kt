@@ -1,4 +1,4 @@
-package com.everis.rickmorty.ui.main.adapters
+package com.everis.rickmorty.presentation.adapters
 
 import android.graphics.BitmapFactory
 import android.view.LayoutInflater

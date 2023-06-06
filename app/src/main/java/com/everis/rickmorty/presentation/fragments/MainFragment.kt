@@ -1,7 +1,6 @@
-package com.everis.rickmorty.ui.main.fragments
+package com.everis.rickmorty.presentation.fragments
 
 import android.content.Intent
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -9,10 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.everis.rickmorty.R
+import com.everis.rickmorty.data.repository.CharacterRepositoryImpl
+import com.everis.rickmorty.data.source.CharacterDataSourceImpl
 import com.everis.rickmorty.databinding.MainFragmentBinding
-import com.everis.rickmorty.ui.main.adapters.CharacterAdapter
-import com.everis.rickmorty.ui.main.DetailsActivity
-import com.everis.rickmorty.ui.main.viewmodel.MainViewModel
+import com.everis.rickmorty.domain.usecase.CharacterUseCaseImpl
+import com.everis.rickmorty.presentation.adapters.CharacterAdapter
+import com.everis.rickmorty.presentation.modules.DetailsActivity
+import com.everis.rickmorty.presentation.modules.MainViewModel
 
 class MainFragment : Fragment() {
 
@@ -20,8 +22,12 @@ class MainFragment : Fragment() {
         fun newInstance() = MainFragment()
     }
 
-    private lateinit var viewModel: MainViewModel
+
     private lateinit var binding: MainFragmentBinding
+
+    private var repository = CharacterRepositoryImpl(dataSource = CharacterDataSourceImpl())
+    private val usecase = CharacterUseCaseImpl(repository = repository)
+    private val viewModel: MainViewModel = MainViewModel(usecase = usecase)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,11 +39,10 @@ class MainFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
 
         binding = MainFragmentBinding.bind(view)
 
-        viewModel.getData()
+        viewModel.getCharacters()
 
         viewModel.userProfileResponse.observe(viewLifecycleOwner, { userProfileResponse ->
             val adapter = CharacterAdapter(userProfileResponse.results) { character ->

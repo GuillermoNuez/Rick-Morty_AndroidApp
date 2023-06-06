@@ -1,10 +1,11 @@
-package com.everis.rickmorty.ui.main
+package com.everis.rickmorty.presentation.modules
 
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import com.everis.rickmorty.databinding.ActivityDetailBinding
+import com.everis.rickmorty.ui.main.Results
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

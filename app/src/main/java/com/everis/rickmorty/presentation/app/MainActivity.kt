@@ -1,8 +1,9 @@
-package com.everis.rickmorty
+package com.everis.rickmorty.presentation.app
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.everis.rickmorty.ui.main.fragments.MainFragment
+import com.everis.rickmorty.R
+import com.everis.rickmorty.presentation.fragments.MainFragment
 
 class MainActivity : AppCompatActivity() {
 

@@ -11,15 +11,60 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 interface CharacterDataSource {
-    fun getCharacters(): ModelResponse?
+    fun getCharacters(page:Int): ModelResponse?
+    fun getCharactersByName(name: String, page:Int): ModelResponse?
 }
 
 class CharacterDataSourceImpl : CharacterDataSource {
-    override fun getCharacters(): ModelResponse? {
+    override fun getCharacters(page:Int): ModelResponse? {
         val result = runBlocking(Dispatchers.IO) {
             var httpURLConnection: HttpURLConnection? = null
             try {
-                val url = URL("https://rickandmortyapi.com/api/character")
+                val url = URL("https://rickandmortyapi.com/api/character?page=$page")
+                httpURLConnection = url.openConnection() as HttpURLConnection
+                val code = httpURLConnection.responseCode
+                val message = httpURLConnection.responseMessage
+
+                println("Response Code: $code")
+                println("Response Message: $message")
+
+                if (code != 200) {
+                    println("ERROR Code :: $code")
+                    return@runBlocking null
+                }
+
+                val jsonStringHolder = StringBuilder()
+
+                BufferedReader(InputStreamReader(httpURLConnection.inputStream)).use { reader ->
+                    jsonStringHolder.append(reader.readText())
+                }
+
+                val result = jsonStringHolder.toString()
+                if (result.isNotEmpty()) {
+
+                    println("Data :: $result")
+                    Gson().fromJson(result, ModelResponse::class.java)
+                } else {
+                    null
+                }
+            } catch (ioexception: IOException) {
+                "ERROR: Something went wrong"
+                null
+            } finally {
+                httpURLConnection?.disconnect()
+            }
+        }
+        return result
+    }
+
+    override fun getCharactersByName(name: String,  page:Int): ModelResponse? {
+        val result = runBlocking(Dispatchers.IO) {
+            var httpURLConnection: HttpURLConnection? = null
+            try {
+
+
+                val url = URL("https://rickandmortyapi.com/api/character/?name=$name&page=$page")
+                println("URL :: $url")
                 httpURLConnection = url.openConnection() as HttpURLConnection
                 val code = httpURLConnection.responseCode
                 val message = httpURLConnection.responseMessage

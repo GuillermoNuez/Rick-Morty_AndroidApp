@@ -43,7 +43,7 @@ class MainFragment : Fragment() {
 
         binding = MainFragmentBinding.bind(view)
 
-        viewModel.getCharacters()
+        viewModel.getCharacters(1, true)
 
         viewModel.userProfileResponse.observe(viewLifecycleOwner, { userProfileResponse ->
             setAdapter(userProfileResponse.results)
@@ -51,27 +51,44 @@ class MainFragment : Fragment() {
 
         viewModel.error.observe(viewLifecycleOwner, { error ->
             if (error) {
+                binding.recyclerView.visibility = View.INVISIBLE
                 binding.errorLayout.visibility = View.VISIBLE
-                binding.searchView.visibility = View.INVISIBLE
             } else {
                 binding.errorLayout.visibility = View.INVISIBLE
-                binding.searchView.visibility = View.VISIBLE
+                binding.recyclerView.visibility = View.VISIBLE
             }
         })
 
+        binding.RightArrow.setOnClickListener {
+            viewModel.RightArrowClick()
+            binding.currentPage.text = viewModel.currentPage.toString()
+        }
+
+        binding.leftArrow.setOnClickListener {
+            viewModel.LeftArrowClick()
+
+             binding.currentPage.text = viewModel.currentPage.toString()
+        }
+
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String): Boolean {
+            override fun onQueryTextSubmit(newText: String): Boolean {
+                viewModel.getCharactersByName(newText, 1, true)
+                binding.currentPage.text = "1"
                 return true
             }
 
             override fun onQueryTextChange(newText: String): Boolean {
-                setAdapter(viewModel.filterCharacters(newText))
+
+                if (newText == "") {
+                    viewModel.getCharacters(1)
+                    binding.currentPage.text = "1"
+                }
                 return true
             }
         })
     }
 
-    private fun setAdapter(list : ArrayList<Results> ) {
+    private fun setAdapter(list: ArrayList<Results>) {
         val adapter = CharacterAdapter(list) { character ->
             val intent = Intent(requireContext(), DetailsActivity::class.java)
             intent.putExtra("character", character)
@@ -80,5 +97,8 @@ class MainFragment : Fragment() {
 
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
         binding.recyclerView.adapter = adapter
+
+        binding.RightArrow.visibility = if (viewModel.currentPage < viewModel.pages) View.VISIBLE else View.INVISIBLE
+        binding.leftArrow.visibility = if (viewModel.currentPage > 1) View.VISIBLE else View.INVISIBLE
     }
 }

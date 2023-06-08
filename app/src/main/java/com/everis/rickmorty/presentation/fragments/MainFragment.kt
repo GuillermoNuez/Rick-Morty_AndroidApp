@@ -8,7 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.room.Room
 import com.everis.rickmorty.R
+import com.everis.rickmorty.data.database.CharacterDatabase
 import com.everis.rickmorty.data.repository.CharacterRepositoryImpl
 import com.everis.rickmorty.data.source.CharacterDataSourceImpl
 import com.everis.rickmorty.databinding.MainFragmentBinding
@@ -26,9 +28,9 @@ class MainFragment : Fragment() {
 
     private lateinit var binding: MainFragmentBinding
 
-    private var repository = CharacterRepositoryImpl(dataSource = CharacterDataSourceImpl())
-    private val usecase = CharacterUseCaseImpl(repository = repository)
-    private val viewModel: MainViewModel = MainViewModel(usecase = usecase)
+    private var repository: CharacterRepositoryImpl? = null
+    private var usecase: CharacterUseCaseImpl? = null
+    private var viewModel: MainViewModel? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,13 +45,19 @@ class MainFragment : Fragment() {
 
         binding = MainFragmentBinding.bind(view)
 
-        viewModel.getCharacters(1, true)
+        repository = CharacterRepositoryImpl(dataSource = CharacterDataSourceImpl(requireContext()))
+        usecase = CharacterUseCaseImpl(repository = repository!!)
+        viewModel = MainViewModel(usecase = usecase!!)
 
-        viewModel.userProfileResponse.observe(viewLifecycleOwner, { userProfileResponse ->
+
+        viewModel?.getCharacters(1, true)
+
+        viewModel?.userProfileResponse?.observe(viewLifecycleOwner, { userProfileResponse ->
             setAdapter(userProfileResponse.results)
+
         })
 
-        viewModel.error.observe(viewLifecycleOwner, { error ->
+        viewModel?.error?.observe(viewLifecycleOwner, { error ->
             if (error) {
                 binding.recyclerView.visibility = View.INVISIBLE
                 binding.errorLayout.visibility = View.VISIBLE
@@ -60,19 +68,19 @@ class MainFragment : Fragment() {
         })
 
         binding.RightArrow.setOnClickListener {
-            viewModel.RightArrowClick()
-            binding.currentPage.text = viewModel.currentPage.toString()
+            viewModel?.RightArrowClick()
+            binding.currentPage.text = viewModel?.currentPage.toString()
         }
 
         binding.leftArrow.setOnClickListener {
-            viewModel.LeftArrowClick()
+            viewModel?.LeftArrowClick()
 
-             binding.currentPage.text = viewModel.currentPage.toString()
+            binding.currentPage.text = viewModel?.currentPage.toString()
         }
 
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(newText: String): Boolean {
-                viewModel.getCharactersByName(newText, 1, true)
+                viewModel?.getCharactersByName(newText, 1, true)
                 binding.currentPage.text = "1"
                 return true
             }
@@ -80,7 +88,7 @@ class MainFragment : Fragment() {
             override fun onQueryTextChange(newText: String): Boolean {
 
                 if (newText == "") {
-                    viewModel.getCharacters(1)
+                    viewModel?.getCharacters(1)
                     binding.currentPage.text = "1"
                 }
                 return true
@@ -98,7 +106,9 @@ class MainFragment : Fragment() {
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
         binding.recyclerView.adapter = adapter
 
-        binding.RightArrow.visibility = if (viewModel.currentPage < viewModel.pages) View.VISIBLE else View.INVISIBLE
-        binding.leftArrow.visibility = if (viewModel.currentPage > 1) View.VISIBLE else View.INVISIBLE
+        binding.RightArrow.visibility =
+            if (viewModel?.currentPage!! < viewModel?.pages!!) View.VISIBLE else View.INVISIBLE
+        binding.leftArrow.visibility =
+            if (viewModel?.currentPage!! > 1) View.VISIBLE else View.INVISIBLE
     }
 }

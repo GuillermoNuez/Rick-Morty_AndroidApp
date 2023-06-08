@@ -1,6 +1,7 @@
 package com.everis.rickmorty.ui.main
 
-import android.annotation.SuppressLint
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
@@ -16,12 +17,10 @@ data class Info(
     @SerializedName("prev") var prev: String? = null
 )
 
-
 data class Origin(
     @SerializedName("name") var name: String? = null,
     @SerializedName("url") var url: String? = null
 ): Serializable
-
 
 data class Location(
     @SerializedName("name") var name: String? = null,
@@ -29,8 +28,9 @@ data class Location(
 ):  Serializable
 
 
-@SuppressLint("ParcelCreator")
+@Entity(tableName = "characters")
 data class Results(
+    @PrimaryKey(autoGenerate = true) val RoomId: Int = 0,
     @SerializedName("id") var id: Int? = null,
     @SerializedName("name") var name: String? = null,
     @SerializedName("status") var status: String? = null,
@@ -43,5 +43,4 @@ data class Results(
     @SerializedName("episode") var episode: ArrayList<String> = arrayListOf(),
     @SerializedName("url") var url: String? = null,
     @SerializedName("created") var created: String? = null
-
 ): Serializable
